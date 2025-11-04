@@ -184,6 +184,8 @@ function giveHint() {
   if (answer % 3 === 0) hints.push("The number is divisible by 3.");
   if (answer % 5 === 0) hints.push("The number is divisible by 5.");
   if (answer % 7 === 0) hints.push("The number is divisible by 7.");
+  if (answer % 11 === 0) hints.push("The number is divisible by 11.");
+  if (answer % 13 === 0) hints.push("The number is divisible by 13.");
     
   if (answer > level / 2) hints.push("The number is greater than half the range.");
   if (answer < level / 2) hints.push("The number is less than half the range.");
@@ -250,11 +252,15 @@ function giveHint() {
   if (nextP)
     hints.push(`The next prime greater than this number is ${nextP}.`);
 
+  hints.push(`The product of this number multiplied by the numbers above and below it is ${(answer-1)*(answer+1)*answer}`)
+
 
   const smallestFactor = getSmallestFactor(answer);
   if (smallestFactor && smallestFactor !== answer) {
     hints.push(`The smallest factor (besides 1) is ${smallestFactor}.`);
   }
+
+  
 
   const power = Math.ceil(Math.random()*10)+5
   const mod = Math.ceil(Math.random()*10)+2
@@ -267,11 +273,78 @@ function giveHint() {
 
   const power3 = Math.ceil(Math.random()*10)+5
   const mod3 = Math.ceil(Math.random()*10)
-  hints.push(`This number raised to the ${power}th power is congruent to ${(answer**power)%mod3} mod ${mod3}`)
+  hints.push(`This number raised to the ${power}th power is congruent to ${(answer**power3)%mod3} mod ${mod3}`)
 
-  const power4 = Math.ceil(Math.random()*500)+500
-  const mod4 = Math.ceil(Math.random()*100)
-  hints.push(`This number raised to the ${power}th power is congruent to ${(answer**power)%mod4} mod ${mod4}`)
+ // Lucky number pattern
+  if (digitSum === 7) hints.push("Its digits sum to 7 — a 'lucky' number.");
+
+  // Palindrome relation
+  const reversed = parseInt(answer.toString().split("").reverse().join(""));
+  if (reversed !== answer) {
+    if ((answer + reversed) % 11 === 0)
+      hints.push("If reversed and added to itself, the result is divisible by 11.");
+    if (reversed < answer)
+      hints.push("If you flip its digits, the number becomes smaller.");
+  }
+
+  // Binary patterns
+  const bin = answer.toString(2);
+  const ones = bin.split("1").length - 1;
+  if (bin.startsWith("1") && bin.endsWith("1"))
+    hints.push("Its binary form starts and ends with 1.");
+  if (ones % 2 === 0)
+    hints.push("Its binary form has an even number of 1s.");
+
+  // Prime gap
+  if (isPrime(answer - 2) || isPrime(answer + 2))
+    hints.push("It’s 2 away from a prime number.");
+
+  // Factorial nearness
+  const factorials = [1, 2, 6, 24, 120, 720];
+  const nearFact = factorials.find(f => Math.abs(f - answer) <= 3);
+  if (nearFact) hints.push(`It’s close to ${factorials.indexOf(nearFact)}! (${nearFact}).`);
+
+  // Perfect number closeness
+  const perfects = [6, 28, 496, 8128,33550336, 8589869056, 137438691328];
+  if (perfects.some(p => Math.abs(answer - p) <= 2))
+    hints.push("It’s near a perfect number (like 6, 28, 496).");
+
+    hints.push(`This number plus Avogadro's Number is ${answer+6.02214076*10**23}`);
+  // Roman numeral pattern
+  const roman = toRoman(answer);
+  if (roman.startsWith("X"))
+    hints.push("In Roman numerals, it starts with X.");
+
+  // Modulo symmetry
+  if ((answer % 11) === (digitSum % 11))
+    hints.push("Its remainder mod 11 equals its digit sum mod 11.");
+
+  // Digital sum prime
+  if (isPrime(digitSum))
+    hints.push("The sum of its digits is prime.");
+
+  // Triangular sum
+  const triSum = (answer * (answer + 1)) / 2;
+  if (triSum % 2 === 0)
+    hints.push("The sum of all numbers up to it is even.");
+
+  // Euler totient trick (approximate)
+  if (answer % 2 === 0)
+    hints.push("It has about half as many coprime numbers below it (φ(n) ≈ n/2).");
+
+  // Leap year tie-in
+  if (answer % 4 === 0)
+    hints.push("If it were a year, it would be a leap year.");
+
+  // 9-multiplicative pattern
+  if ((answer * 9).toString().split("").reduce((a, b) => a + +b, 0) === 9)
+    hints.push("When multiplied by 9, its digits sum to 9.");
+
+
+
+  // Odd one out
+  if (answer % 2 && Math.floor(answer / 2) % 2 === 0)
+    hints.push("It’s odd, but its half (rounded down) is even.");
 
   hints.push(`This number multipled by four different primes is ${answer*bigPrime1*bigPrime2*bigPrime3*2}`)
 
@@ -279,6 +352,32 @@ function giveHint() {
   let count = 0;
   for (let i = 1; i <= n; i++) if (n % i === 0) count++;
   return count;
+}
+
+function getDigitalRoot(n) {
+  while (n >= 10) {
+    n = n
+      .toString()
+      .split("")
+      .reduce((a, b) => a + parseInt(b), 0);
+  }
+  return n;
+}
+
+function toRoman(num) {
+  const map = [
+    [1000, "M"], [900, "CM"], [500, "D"], [400, "CD"],
+    [100, "C"], [90, "XC"], [50, "L"], [40, "XL"],
+    [10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]
+  ];
+  let result = "";
+  for (const [value, symbol] of map) {
+    while (num >= value) {
+      result += symbol;
+      num -= value;
+    }
+  }
+  return result;
 }
 
 function isTriangular(n) {
