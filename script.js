@@ -14,6 +14,9 @@ const avgTimeEl = document.getElementById("avgTime");
 const currentTimerEl = document.getElementById("currentTime");
 const globalTimerEl = document.getElementById("globalTimer");
 
+const bigPrime1 = 	6791
+const bigPrime2 = 5471
+const bigPrime3 = 6011
 
 let answer, level, score;
 let scoreArr = [];
@@ -192,7 +195,7 @@ function giveHint() {
   const rangeWidth = Math.floor(level / 4);
   const low = Math.max(1, answer - Math.floor(rangeWidth / 2));
   const high = Math.min(level, answer + Math.floor(rangeWidth / 2));
-  hints.push(`The number is between ${low} and ${high}.`);
+ // hints.push(`The number is between ${low} and ${high}.`);
 
 
   if (Number.isInteger(Math.sqrt(answer))) hints.push("The number is a perfect square.");
@@ -252,6 +255,21 @@ function giveHint() {
   if (smallestFactor && smallestFactor !== answer) {
     hints.push(`The smallest factor (besides 1) is ${smallestFactor}.`);
   }
+
+  const power = Math.ceil(Math.random())*10+5
+  const mod = Math.ceil(Math.random())*10
+  hints.push(`This number raised to the ${power}th power is congruent to ${(answer**power)%mod} mod ${mod}`)
+
+  
+  const power2 = Math.ceil(Math.random())*50+25
+  const mod2 = Math.ceil(Math.random())*100
+  hints.push(`This number raised to the ${power2}th power is congruent to ${(answer**power2)%mod2} mod ${mod2}`)
+
+  const power3 = Math.ceil(Math.random())*10+5
+  const mod3 = Math.ceil(Math.random())*10
+  hints.push(`This number raised to the ${power}th power is congruent to ${(answer**power)%mod3} mod ${mod3}`)
+
+  hints.push(`This number multipled by three four digit primes is ${answer*bigPrime1*bigPrime2*bigPrime3}`)
 
   function countFactors(n) {
   let count = 0;
