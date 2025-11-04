@@ -27,7 +27,7 @@ let leaderboard = [100, 100, 100];
 let roundTimer, globalTimer;
 let globalActive = false;
 let globalStart = 0;
-
+let giveUps = 0;
 
 while (!userName) {
   userName = prompt("Enter your name:");
@@ -142,10 +142,12 @@ function giveUp() {
   const endMs = Date.now();
   stopLiveTimer();
   stopGlobalTimer();
+  giveUps++;
 
   msg.style.color = "gray";
   msg.textContent = `😞😞😞😞😞 You gave up, ${userName}! The number was ${answer}. Score: Terrible never play again`;
   score = level; 
+
   updateScore(score);
   updateLeaderboard(score);
   updateTimers(endMs);
@@ -433,7 +435,7 @@ function isPrime(n) {
 
 function updateScore(newScore) {
   scoreArr.push(newScore);
-  wins.textContent = `Total wins: ${scoreArr.length}`;
+  wins.textContent = `Total wins: ${scoreArr.length - giveUps}`;
   const sum = scoreArr.reduce((a, b) => a + b, 0);
   const avg = sum / scoreArr.length;
   avgScore.textContent = `Average Score: ${avg.toFixed(2)}`;
