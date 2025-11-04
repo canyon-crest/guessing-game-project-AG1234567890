@@ -202,11 +202,83 @@ function giveHint() {
   if (answer <= Math.floor(level * 0.25)) hints.push("The number is in the lower 25% of the range.");
   if (answer >= Math.floor(level * 0.75)) hints.push("The number is in the upper 25% of the range.");
 
+  const digitSum = answer
+    .toString()
+    .split("")
+    .reduce((a, b) => a + parseInt(b), 0);
+  hints.push(`The sum of its digits is ${digitSum}.`);
+
+  if (digitSum % 2 === 0 && answer % 2 !== 0)
+    hints.push("It’s odd, but its digit sum is even.");
+  if (digitSum % 2 !== 0 && answer % 2 === 0)
+    hints.push("It’s even, but its digit sum is odd.");
+
+  // mod remainder pattern
+  const modN = [4, 6, 8, 9, 11][Math.floor(Math.random() * 5)];
+  hints.push(`When divided by ${modN}, it leaves a remainder of ${answer % modN}.`);
+
+  // factor-count hint
+  const numFactors = countFactors(answer);
+  hints.push(`It has exactly ${numFactors} factors.`);
+
+  // palindrome hint
+  if (answer.toString() === answer.toString().split("").reverse().join(""))
+    hints.push("It’s a palindrome number ");
+
+  // triangular number test
+  if (isTriangular(answer))
+    hints.push("The number is triangular");
+
+  // fibonacci hint
+  if (isFibonacci(answer))
+    hints.push("The number appears in the Fibonacci sequence.");
+
+  // binary hint
+  const binaryForm = answer.toString(2);
+  const onesCount = binaryForm.split("1").length - 1;
+  hints.push(`Its binary form contains ${onesCount} ones.`);
+
+  // square relation
+  const sq = answer * answer;
+  hints.push(`Its square ends with ${sq % 100}.`);
+
+  // prime neighbor
+  const nextP = nextPrime(answer);
+  if (nextP)
+    hints.push(`The next prime greater than this number is ${nextP}.`);
+
 
   const smallestFactor = getSmallestFactor(answer);
   if (smallestFactor && smallestFactor !== answer) {
     hints.push(`The smallest factor (besides 1) is ${smallestFactor}.`);
   }
+
+  function countFactors(n) {
+  let count = 0;
+  for (let i = 1; i <= n; i++) if (n % i === 0) count++;
+  return count;
+}
+
+function isTriangular(n) {
+  // Solve n = k(k+1)/2 for integer k
+  const k = Math.floor((Math.sqrt(8 * n + 1) - 1) / 2);
+  return (k * (k + 1)) / 2 === n;
+}
+
+function isFibonacci(n) {
+  // A number is Fibonacci if (5n^2 + 4) or (5n^2 - 4) is a perfect square
+  const isSquare = (x) => Number.isInteger(Math.sqrt(x));
+  return isSquare(5 * n * n + 4) || isSquare(5 * n * n - 4);
+}
+
+function nextPrime(n) {
+  let x = n + 1;
+  while (x < n + 1000) { // safety cap
+    if (isPrime(x)) return x;
+    x++;
+  }
+  return null;
+}
 
 
   let randomHint = hints[Math.floor(Math.random() * hints.length)];
