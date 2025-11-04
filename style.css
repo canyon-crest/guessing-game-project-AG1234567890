@@ -1,0 +1,203 @@
+body {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  background: linear-gradient(120deg, #5e60ce, #64dfdf, #80ffdb);
+  background-size: 200% 200%;
+  animation: gradientShift 12s ease infinite;
+  color: #222;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+.container {
+  max-width: 700px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 30px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+
+header h1 {
+  font-size: 2rem;
+  color: #3a0ca3;
+  margin-bottom: 0.2em;
+}
+header p {
+  font-weight: 500;
+  color: #555;
+}
+
+
+.card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+}
+
+
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  margin: 5px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #3a0ca3;
+  color: #fff;
+}
+.btn-primary:hover {
+  background-color: #560bad;
+}
+
+.btn-success {
+  background-color: #2ec4b6;
+  color: #fff;
+}
+.btn-success:hover {
+  background-color: #1b998b;
+}
+
+.btn-danger {
+  background-color: #ef476f;
+  color: #fff;
+}
+.btn-danger:hover {
+  background-color: #d62839;
+}
+
+.input-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+input[type="text"] {
+  padding: 10px;
+  font-size: 1rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  width: 150px;
+  transition: border-color 0.3s ease;
+}
+input[type="text"]:focus {
+  outline: none;
+  border-color: #3a0ca3;
+}
+
+input[type="number"] {
+  padding: 10px;
+  font-size: 1rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  width: 150px;
+  transition: border-color 0.3s ease;
+}
+input[type="number"]:focus {
+  outline: none;
+  border-color: #3a0ca3;
+}
+
+.levels {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+.levels label {
+  font-weight: 500;
+}
+
+
+.leaderboard ol {
+  list-style: none;
+  padding: 0;
+  font-weight: 600;
+  color: #3a0ca3;
+}
+.leaderboard li {
+  background: #edf2fb;
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+
+footer {
+  margin-top: 25px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+  }
+  .levels {
+    flex-direction: column;
+  }
+  input[type="text"] {
+    width: 100px;
+  }
+}
+
+.btn-warning {
+  background-color: #ffb703;
+  color: #222;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(255, 183, 3, 0.3);
+}
+
+.btn-warning:hover {
+  background-color: #fca311;
+  transform: scale(1.05);
+}
+
+/* Pulse animation when clicked */
+.hint-active {
+  animation: pulseHint 0.4s ease;
+}
+
+@keyframes pulseHint {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 183, 3, 0.4); }
+  50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(255, 183, 3, 0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 183, 3, 0); }
+}
+
+/* Optional "flash" effect on message after a hint */
+.msg-flash {
+  animation: flashMsg 0.6s ease-in-out;
+}
+
+@keyframes flashMsg {
+  0% { color: #ffb703; }
+  50% { color: #fb8500; }
+  100% { color: #222; }
+}

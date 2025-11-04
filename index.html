@@ -1,33 +1,62 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>JavaScript Number Guessing Game</title>
-    <script src="script.js" defer></script>
-  </head>
-  <body>
-    <p id="date"></p>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
 
-    <h3>Level</h3>
-    <input type="radio" name="level" id="e" value="3" checked><label for="e">Easy</label>
-    <input type="radio" name="level" id="m" value="10"><label for="m">Medium</label>
-    <input type="radio" name="level" id="h" value="100"><label for="h">Hard</label>
+  <title>Aiden Gao Guessing Game</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Aiden Gao Guessing Game</h1>
+      <p id="date"></p>
+    </header>
 
-    <button id="playBtn">Play</button>
+    <section class="game-settings card">
+      <h2>Choose Your Level</h2>
+      <div class="levels">
+        <label><input type="radio" name="level" id="e" value="3" checked> Easy (1–3)</label>
+        <label><input type="radio" name="level" id="m" value="10"> Medium (1–10)</label>
+        <label><input type="radio" name="level" id="h" value="100"> Hard (1–100)</label>
+       <label><input type="number" id="customMax" placeholder="Custom range"></label>
+      </div>
+      <button id="playBtn" class="btn-primary">Play</button>
+    </section>
 
-    <h3 id="msg">Select a Level</h3>
-    <input type="text" id="guess" disabled>
-    <button id="guessBtn" disabled>Guess</button>
-    <button id="giveUpBtn" disabled>Give Up</button>
+    <section class="gameplay card">
+      <h2 id="msg">Select a level to start</h2>
+      <div class="input-group">
+        <input type="text" id="guess" placeholder="Enter your guess" disabled>
+        <button id="guessBtn" class="btn-success" disabled>Guess</button>
+          <button id="hintBtn" class="btn-warning" disabled>Hint</button>
+        <button id="giveUpBtn" class="btn-danger" disabled>Give Up (do not click)</button>
+      </div>
+    </section>
 
-    <h3>Stats</h3>
-    <p id="wins">Total wins: 0</p>
-    <p id="avgScore">Average Score: </p>
+    <section class="stats card">
+      <h2>Stats</h2>
+      <p id="currentTime">Round time: 0s</p>
+      <p id="globalTimer">Total active play time: 0s</p>
+      <p id="wins">Total wins: 0</p>
+      <p id="avgScore">Average Score: </p>
+      <p id="fastest">Fastest game: </p>
+      <p id="avgTime">Average time per game: </p>
+    </section>
 
-    <h3>Leaderboard</h3>
-    <ol>
-      <li name="leaderboard">100</li>
-      <li name="leaderboard">100</li>
-      <li name="leaderboard">100</li>
-    </ol>
-  </body>
+    <section class="leaderboard card">
+      <h2>Leaderboard</h2>
+      <ol>
+        <li name="leaderboard">100</li>
+        <li name="leaderboard">100</li>
+        <li name="leaderboard">100</li>
+      </ol>
+    </section>
+
+    <footer>
+      <p>hello</p>
+    </footer>
+  </div>
+</body>
 </html>

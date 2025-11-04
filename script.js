@@ -1,84 +1,306 @@
-// add javascript here
-//time
-date.textContent = time()
+const dateEl = document.getElementById("date");
+const playBtn = document.getElementById("playBtn");
+const guessBtn = document.getElementById("guessBtn");
+const giveUpBtn = document.getElementById("giveUpBtn");
+const hintBtn = document.getElementById("hintBtn");
+const msg = document.getElementById("msg");
+const guess = document.getElementById("guess");
+const wins = document.getElementById("wins");
+const avgScore = document.getElementById("avgScore");
+const levelArr = document.getElementsByName("level");
 
-let score, answer, level
-const levelArr = document.getElementsByName("level")
-const scoreArr = []
+const fastestEl = document.getElementById("fastest");
+const avgTimeEl = document.getElementById("avgTime");
+const currentTimerEl = document.getElementById("currentTime");
+const globalTimerEl = document.getElementById("globalTimer");
 
-playBtn.addEventListener("click",play)
-guessBtn.addEventListener("click",makeGuess)
-function time(){
-    let d = new Date()
 
-    let str=(d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear()
-    return str
+let answer, level, score;
+let scoreArr = [];
+let userName = "";
+let startTime, totalTime = 0, gamesPlayed = 0;
+let fastestTime = Infinity;
+let leaderboard = [100, 100, 100];
+let roundTimer, globalTimer;
+let globalActive = false;
+let globalStart = 0;
+
+
+while (!userName) {
+  userName = prompt("Enter your name:");
+  if (userName) {
+    userName = userName.trim();
+    userName = userName.charAt(0).toUpperCase() + userName.slice(1).toLowerCase();
+  }
 }
+msg.textContent = `Welcome, ${userName}! Select a level to start.`;
 
-function time(){
 
-}
-
-function play(){
-    playBtn.disabled =  true
-    guessBtn.disabled = false
-    guess.disabled = false
-    for (let i=0;i<levelArr.length;i++){
-        levelArr[i].disabled = true
-        if(levelArr[i].checked){
-            level = levelArr[i].value
-        }
+function time() {
+  const d = new Date();
+  const day = d.getDate();
+  const monthName = d.toLocaleString("default", { month: "long" });
+  const suffix = (n) => {
+    if (n >= 11 && n <= 13) return "th";
+    switch (n % 10) {
+      case 1: return "st";
+      case 2: return "nd";
+      case 3: return "rd";
+      default: return "th";
     }
-    answer = Math.floor(Math.random()*level)+1
-    msg.textContent = "Guess a number 1-"+level
-    guess.placeholder = answer
-    score = 0
+  };
+  return `${monthName} ${day}${suffix(day)}, ${d.getFullYear()}, ${d.toLocaleTimeString()}`;
+}
+
+function updateDateTime() {
+  dateEl.textContent = time();
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
+
+
+playBtn.addEventListener("click", play);
+guessBtn.addEventListener("click", makeGuess);
+giveUpBtn.addEventListener("click", giveUp);
+hintBtn.addEventListener("click", giveHint);
+
+
+function play() {
+  playBtn.disabled = true;
+  guessBtn.disabled = false;
+  giveUpBtn.disabled = false;
+  hintBtn.disabled = false;
+  guess.disabled = false;
+
+  for (let i = 0; i < levelArr.length; i++) {
+    levelArr[i].disabled = true;
+    if (levelArr[i].checked) level = parseInt(levelArr[i].value);
+  }
+  if (document.getElementById("customMax").value)
+  level = parseInt(document.getElementById("customMax").value);
+
+
+  answer = Math.floor(Math.random() * level) + 1;
+  score = 0;
+  startTime = Date.now();
+  msg.style.color = "black";
+  msg.textContent = `${userName}, guess a number between 1 and ${level}.`;
+  guess.value = "";
+  guess.focus();
+
+  startLiveTimer();
+  startGlobalTimer();
+}
+
+function makeGuess() {
+  const userGuess = parseInt(guess.value);
+  if (isNaN(userGuess) || userGuess < 1 || userGuess > level) {
+    msg.textContent = "❌ Invalid input! Enter a number within range.";
+    return;
+  }
+
+  score++;
+  const diff = Math.abs(answer - userGuess);
+  let feedback = "";
+
+  if (diff === 0) {
+    const endMs = Date.now();
+    stopLiveTimer();
+    stopGlobalTimer();
+
+    const optimalGuesses = Math.ceil(Math.log2(level) - 1);
+    msg.style.color = "green";
+    msg.textContent = `Correct, ${userName}! You won in ${score} tries — ${getScoreQuality(score, level)}
+     An optimal AI would have needed ~${optimalGuesses} guesses.`;
+
+    updateScore(score);
+    updateLeaderboard(score);
+    updateTimers(endMs);
+    reset();
+    return;
+  }
+
+  if (diff <= 2) {
+    feedback = "🔥 Hot!";
+    msg.style.color = "red";
+  } else if (diff <= 5) {
+    feedback = "Warm";
+    msg.style.color = "orange";
+  } else {
+    feedback = "❄️ Cold";
+    msg.style.color = "blue";
+  }
+
+  if (userGuess > answer) msg.textContent = `${feedback} Too high!`;
+  else msg.textContent = `${feedback} Too low!`;
+}
+
+function giveUp() {
+  const endMs = Date.now();
+  stopLiveTimer();
+  stopGlobalTimer();
+
+  msg.style.color = "gray";
+  msg.textContent = `😞😞😞😞😞 You gave up, ${userName}! The number was ${answer}. Score: Terrible never play again`;
+  score = level; 
+  updateScore(score);
+  updateLeaderboard(score);
+  updateTimers(endMs);
+  reset();
+}
+
+function reset() {
+  guessBtn.disabled = true;
+  giveUpBtn.disabled = true;
+  hintBtn.disabled = true;
+  playBtn.disabled = false;
+  guess.disabled = true;
+  guess.value = "";
+  for (let i = 0; i < levelArr.length; i++) levelArr[i].disabled = false;
+  stopLiveTimer();
+}
+
+
+let lastHint = "";
+
+function giveHint() {
+
+  hintBtn.classList.add("hint-active");
+  setTimeout(() => hintBtn.classList.remove("hint-active"), 400);
+
+
+  hintBtn.disabled = true;
+  setTimeout(() => hintBtn.disabled = false, 750);
+
+  const hints = [];
+
+
+  hints.push(answer % 2 === 0 ? "The number is even." : "The number is odd.");
+  if (isPrime(answer)) hints.push("The number is prime.");
+
+  if (answer % 3 === 0) hints.push("The number is divisible by 3.");
+  if (answer % 5 === 0) hints.push("The number is divisible by 5.");
+  if (answer % 7 === 0) hints.push("The number is divisible by 7.");
     
+  if (answer > level / 2) hints.push("The number is greater than half the range.");
+  if (answer < level / 2) hints.push("The number is less than half the range.");
+
+
+  hints.push(`The number ends with ${answer % 10}.`);
+
+
+  const rangeWidth = Math.floor(level / 4);
+  const low = Math.max(1, answer - Math.floor(rangeWidth / 2));
+  const high = Math.min(level, answer + Math.floor(rangeWidth / 2));
+  hints.push(`The number is between ${low} and ${high}.`);
+
+
+  if (Number.isInteger(Math.sqrt(answer))) hints.push("The number is a perfect square.");
+  if (Number.isInteger(Math.cbrt(answer))) hints.push("The number is a perfect cube.");
+
+
+  if (answer <= Math.floor(level * 0.25)) hints.push("The number is in the lower 25% of the range.");
+  if (answer >= Math.floor(level * 0.75)) hints.push("The number is in the upper 25% of the range.");
+
+
+  const smallestFactor = getSmallestFactor(answer);
+  if (smallestFactor && smallestFactor !== answer) {
+    hints.push(`The smallest factor (besides 1) is ${smallestFactor}.`);
+  }
+
+
+  let randomHint = hints[Math.floor(Math.random() * hints.length)];
+  let safetyCounter = 0;
+  while (randomHint === lastHint && safetyCounter < 10) {
+    randomHint = hints[Math.floor(Math.random() * hints.length)];
+    safetyCounter++;
+  }
+  lastHint = randomHint;
+
+  msg.textContent = `💡 Hint: ${randomHint}`;
+  msg.classList.add("msg-flash");
+  setTimeout(() => msg.classList.remove("msg-flash"), 600);
 }
 
-function makeGuess(){
-    let userGuess = parseInt(guess.value);
-    if(isNaN(userGuess) || userGuess < 1 || userGuess > level){
-        msg.textContent = "INVALID, guess a number"
-        return
-    }
-    score++;
-    if(userGuess>answer){
-         msg.textContent = "Too high"
-    } else if (userGuess < answer){
-        msg.textContent = "Too low"
-    } else {
-        msg.textContent = "Correct. Your score is "+score
-        reset()
-        updateScore()
-    }
-
+function getSmallestFactor(n) {
+  if (n < 2) return null;
+  for (let i = 2; i * i <= n; i++) {
+    if (n % i === 0) return i;
+  }
+  return null;
 }
 
-function reset(){
-    guessBtn.disabled=true
-    guess.value=""
-    guess.placeholder = ""
-    playBtn.disabled=false
-    guess.disabled=true
-        for (let i=0;i<levelArr.length;i++){
-        levelArr[i].disabled = false
-
-    }
+function isPrime(n) {
+  if (n < 2) return false;
+  for (let i = 2; i * i <= n; i++) if (n % i === 0) return false;
+  return true;
 }
 
-function updateScore(){
-    scoreArr.push(score)
-    wins.textContent = "Towal wins: "+scoreArr.length
-    let sum = 0
-    scoreArr.sort((a,b)=> a-b)
-    const lb = document.getElementsByName("leaderboard")
-    for (let i=0;i<scoreArr.length;i++){
-        sum+= scoreArr[i]
-        if(i<lb.length){
-            lb[i].textContent = scoreArr[i]
-        }
-    }
-    let avg = sum/scoreArr.length;
-    avgScore.textContent = "Average Score: "+avg.toFixed(2)
+
+function updateScore(newScore) {
+  scoreArr.push(newScore);
+  wins.textContent = `Total wins: ${scoreArr.length}`;
+  const sum = scoreArr.reduce((a, b) => a + b, 0);
+  const avg = sum / scoreArr.length;
+  avgScore.textContent = `Average Score: ${avg.toFixed(2)}`;
+}
+
+function updateLeaderboard(newScore) {
+  leaderboard.push(newScore);
+  leaderboard.sort((a, b) => a - b);
+  leaderboard = leaderboard.slice(0, 3);
+  const items = document.getElementsByName("leaderboard");
+  items.forEach((li, i) => (li.textContent = leaderboard[i]));
+}
+
+function updateTimers(endMs) {
+  const roundTime = (endMs - startTime) / 1000;
+  totalTime += roundTime;
+  gamesPlayed++;
+  if (roundTime < fastestTime) fastestTime = roundTime;
+  if (fastestEl) fastestEl.textContent = `Fastest game: ${fastestTime.toFixed(2)}s`;
+  if (avgTimeEl) avgTimeEl.textContent = `Average time per game: ${(totalTime / gamesPlayed).toFixed(2)}s`;
+}
+
+
+function startLiveTimer() {
+  if (!currentTimerEl) return;
+  const tick = () => {
+    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    currentTimerEl.textContent = `⏱ Round time: ${elapsed}s`;
+  };
+  tick();
+  roundTimer = setInterval(tick, 1000);
+}
+
+function stopLiveTimer() {
+  if (roundTimer) clearInterval(roundTimer);
+  if (currentTimerEl) currentTimerEl.textContent = "";
+}
+
+
+function startGlobalTimer() {
+  if (globalActive) return;
+  globalStart = Date.now();
+  globalActive = true;
+  const tick = () => {
+    if (!globalActive) return;
+    const elapsed = ((Date.now() - globalStart) / 1000).toFixed(1);
+    globalTimerEl.textContent = `🌍 Total active play time: ${elapsed}s`;
+  };
+  tick();
+  globalTimer = setInterval(tick, 1000);
+}
+
+function stopGlobalTimer() {
+  if (globalTimer) clearInterval(globalTimer);
+  globalActive = false;
+  globalTimerEl.textContent = "";
+}
+
+
+function getScoreQuality(score, level) {
+  if (score <= level / 4) return "🟢 Good score!";
+  if (score <= level / 2) return "🟡 Okay score.";
+  return "🔴 Bad score.";
 }
