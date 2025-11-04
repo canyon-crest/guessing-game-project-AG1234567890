@@ -221,6 +221,7 @@ function giveHint() {
   msg.classList.add("msg-flash");
   setTimeout(() => msg.classList.remove("msg-flash"), 600);
 }
+//
 
 function getSmallestFactor(n) {
   if (n < 2) return null;
