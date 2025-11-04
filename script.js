@@ -14,7 +14,7 @@ const avgTimeEl = document.getElementById("avgTime");
 const currentTimerEl = document.getElementById("currentTime");
 const globalTimerEl = document.getElementById("globalTimer");
 
-const bigPrime1 = 	6791
+const bigPrime1 = 6791
 const bigPrime2 = 5471
 const bigPrime3 = 6011
 
@@ -166,8 +166,9 @@ function reset() {
 
 let lastHint = "";
 
-function giveHint() {
 
+function giveHint() {
+  const hints = [];
   hintBtn.classList.add("hint-active");
   setTimeout(() => hintBtn.classList.remove("hint-active"), 400);
 
@@ -175,7 +176,6 @@ function giveHint() {
   hintBtn.disabled = true;
   setTimeout(() => hintBtn.disabled = false, 750);
 
-  const hints = [];
 
 
   hints.push(answer % 2 === 0 ? "The number is even." : "The number is odd.");
@@ -256,20 +256,24 @@ function giveHint() {
     hints.push(`The smallest factor (besides 1) is ${smallestFactor}.`);
   }
 
-  const power = Math.ceil(Math.random())*10+5
-  const mod = Math.ceil(Math.random())*10
+  const power = Math.ceil(Math.random()*10)+5
+  const mod = Math.ceil(Math.random()*10)+2
   hints.push(`This number raised to the ${power}th power is congruent to ${(answer**power)%mod} mod ${mod}`)
 
   
-  const power2 = Math.ceil(Math.random())*50+25
-  const mod2 = Math.ceil(Math.random())*100
+  const power2 = Math.ceil(Math.random()*50)+25
+  const mod2 = Math.ceil(Math.random()*100)
   hints.push(`This number raised to the ${power2}th power is congruent to ${(answer**power2)%mod2} mod ${mod2}`)
 
-  const power3 = Math.ceil(Math.random())*10+5
-  const mod3 = Math.ceil(Math.random())*10
+  const power3 = Math.ceil(Math.random()*10)+5
+  const mod3 = Math.ceil(Math.random()*10)
   hints.push(`This number raised to the ${power}th power is congruent to ${(answer**power)%mod3} mod ${mod3}`)
 
-  hints.push(`This number multipled by three four digit primes is ${answer*bigPrime1*bigPrime2*bigPrime3}`)
+  const power4 = Math.ceil(Math.random()*500)+500
+  const mod4 = Math.ceil(Math.random()*100)
+  hints.push(`This number raised to the ${power}th power is congruent to ${(answer**power)%mod4} mod ${mod4}`)
+
+  hints.push(`This number multipled by four different primes is ${answer*bigPrime1*bigPrime2*bigPrime3*2}`)
 
   function countFactors(n) {
   let count = 0;
