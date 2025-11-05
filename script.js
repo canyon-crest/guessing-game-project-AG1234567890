@@ -120,6 +120,7 @@ function makeGuess() {
     updateLeaderboard(score);
     updateTimers(endMs);
     reset();
+    updateElo(true, score, level);
     return;
   }
 
@@ -147,6 +148,7 @@ function giveUp() {
   msg.style.color = "gray";
   msg.textContent = `😞😞😞😞😞 You gave up, ${userName}! The number was ${answer}. Score: Terrible never play again`;
   score = level; 
+  updateElo(false, score, level);
 
   updateScore(score);
   updateLeaderboard(score);
@@ -475,28 +477,164 @@ function stopLiveTimer() {
 }
 
 
+let totalGlobalTime = 0; // total seconds across all games
+
 function startGlobalTimer() {
+  // Only start if not already running
   if (globalActive) return;
-  globalStart = Date.now();
+
   globalActive = true;
+  globalStart = Date.now();
+
   const tick = () => {
     if (!globalActive) return;
-    const elapsed = ((Date.now() - globalStart) / 1000).toFixed(1);
-    globalTimerEl.textContent = `🌍 Total active play time: ${elapsed}s`;
+    const elapsed = (Date.now() - globalStart) / 1000;
+    const totalElapsed = totalGlobalTime + elapsed;
+    globalTimerEl.textContent = `🌍 Total active play time: ${totalElapsed.toFixed(1)}s`;
   };
+
   tick();
   globalTimer = setInterval(tick, 1000);
 }
 
 function stopGlobalTimer() {
-  if (globalTimer) clearInterval(globalTimer);
+  if (globalActive) {
+
+    const elapsed = (Date.now() - globalStart) / 1000;
+    totalGlobalTime += elapsed;
+  }
+
   globalActive = false;
-  globalTimerEl.textContent = "";
+  clearInterval(globalTimer);
+  globalTimer = null;
+
+
+  globalTimerEl.textContent = `🌍 Total active play time: ${totalGlobalTime.toFixed(1)}s`;
+}
+
+function getScoreQuality(score, level) {
+  let expected  = Math.log2(level)
+  if (score <= expected - 4) return "🟢 Exceptional score!";
+  if (score <= expected - 2) return "🟢 Good score!";
+  if (score >= expected + 6) return "🔴 Disastrous score.";
+  if (score >= expected + 4) return "🔴 Horrific score.";
+  if (score >= expected + 2) return "🔴 Bad score.";
+
+  return "🟡 Okay score.";
 }
 
 
-function getScoreQuality(score, level) {
-  if (score <= level / 4) return "🟢 Good score!";
-  if (score <= level / 2) return "🟡 Okay score.";
-  return "🔴 Bad score.";
+let elo = 1000;         
+const baseK = 20;  
+
+function updateElo(won, score, level) {
+  const oldElo = elo;
+  const levelRating =
+    level <= 3 ? 900 : level <= 10 ? 1100 : level <= 30 ? 1300 : 1500;
+  const performance = won ? 1 : 0;
+  const expected = 1 / (1 + 10 ** ((levelRating - elo) / 400));
+
+  // --- Base K scaling: harder to gain, easier to lose at high ELO ---
+  let kFactor;
+    if (elo < 800) kFactor = baseK * 2.5;
+  if (elo < 800) kFactor = baseK * 2;
+  else if (elo < 1000) kFactor = baseK * 1.5;
+  else if (elo < 1300) kFactor = baseK * 1.2;
+  else if (elo < 1600) kFactor = baseK * 1;
+  else if (elo < 2000) kFactor = baseK * 0.8;
+  else if (elo < 2500) kFactor = baseK * 0.6;
+  else if (elo < 3000) kFactor = baseK * 0.3;
+  else kFactor = baseK * 0.15;
+
+  let delta = kFactor * (performance - expected);
+
+
+  const expectedGuesses = Math.log2(level);
+  if (won) {
+    if (score <= expectedGuesses) {
+      const efficiencyBonus = 30 * (expectedGuesses / score);
+      delta += efficiencyBonus;
+    } else {
+      const ineffPenalty = -35 * ((score / expectedGuesses) - 1);
+      delta += ineffPenalty;
+    }
+  } else {
+    delta -= 80; // harsh penalty for giving up
+  }
+
+
+  const difficultyMultiplier = Math.min(1.2, 0.6 + level / 100);
+  delta *= difficultyMultiplier;
+
+
+  if (delta > 0) {
+
+    const shrink = 1 / (1 + Math.pow(elo / 1500, 1.15));
+    delta *= shrink;
+  } else {
+
+    const amp = 1 + Math.pow(elo / 1500, 1.1);
+    delta *= amp;
+  }
+
+delta -= (elo/500)
+  delta = Math.min(100, delta)
+  elo = Math.max(100, elo + delta);
+
+  // --- Display feedback ---
+  const actualChange = elo - oldElo;
+  const symbol = actualChange >= 0 ? "🟢+" : "🔴";
+  const rank = eloRank();
+  document.getElementById(
+    "elo"
+  ).textContent = `ELO Rating: ${elo.toFixed(
+    2
+  )} (${symbol}${actualChange.toFixed(2)}) — Rank: ${rank}`;
+}
+
+function eloRank() {
+  const body = document.body; // or document.getElementById("gameContainer")
+  let rank = "";
+  let color = "";
+  let emoji = "";
+
+  if (elo < 800) {
+    rank = "Iron";
+    emoji = "⚒️";
+    color = "linear-gradient(180deg, #3b3b3b, #1f1f1f)";
+  } else if (elo < 1000) {
+    rank = "Bronze";
+    emoji = "🥉";
+    color = "linear-gradient(180deg, #a97142, #5a3b1a)";
+  } else if (elo < 1300) {
+    rank = "Silver";
+    emoji = "🥈";
+    color = "linear-gradient(180deg, #b8b8b8, #7d7d7d)";
+  } else if (elo < 1600) {
+    rank = "Gold";
+    emoji = "🥇";
+    color = "linear-gradient(180deg, #ffd700, #c8a000)";
+  } else if (elo < 2000) {
+    rank = "Platinum";
+    emoji = "💠";
+    color = "linear-gradient(180deg, #6cf5f5, #218b8b)";
+  } else if (elo < 2500) {
+    rank = "Diamond";
+    emoji = "🔷";
+    color = "linear-gradient(180deg, #66aaff, #1a2e5a)";
+  } else if (elo < 3000) {
+    rank = "Emerald";
+    emoji = "💚";
+    color = "linear-gradient(180deg, #00e676, #006b4e)";
+  } else {
+    rank = "Grandmaster";
+    emoji = "👑";
+    color = "linear-gradient(180deg, #ff4c4c, #7a0000)";
+  }
+
+  // ✨ Animate background color change
+  body.style.transition = "background 1s ease-in-out";
+  body.style.background = color;
+
+  return `${rank} ${emoji}`;
 }
