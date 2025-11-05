@@ -201,3 +201,60 @@ footer {
   50% { color: #fb8500; }
   100% { color: #222; }
 }
+
+#helpBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: transform 0.2s ease;
+}
+#helpBtn:hover {
+  transform: scale(1.2);
+}
+
+#helpModal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  transition: opacity 0.3s ease;
+}
+#helpModal.hidden {
+  display: none;
+}
+
+#helpContent {
+  background: #fff;
+  color: #111;
+  padding: 20px 30px;
+  border-radius: 12px;
+  max-width: 420px;
+  line-height: 1.5;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+  animation: popIn 0.3s ease;
+}
+
+#closeHelp {
+  float: right;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s ease;
+}
+#closeHelp:hover {
+  color: #000;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+
+
+

@@ -35,7 +35,39 @@
       </div>
     </section>
 <h3>Rating</h3>
-<p id="elo">ELO Rating: 1000</p>
+
+<div id="eloContainer">
+  <p id="elo">ELO Rating: 1000 (🟢 +0) — Rank: Silver </p>
+  <button id="helpBtn" title="How ELO works">❓</button>
+</div>
+
+<!-- Modal -->
+<div id="helpModal" class="hidden">
+  <div id="helpContent">
+    <span id="closeHelp">&times;</span>
+    <h2>📈 ELO System Explained</h2>
+    <p><strong>Base concept:</strong> Your <em>ELO</em> represents your skill rating.</p>
+    <ul>
+      <li>Win efficiently → gain ELO ✅</li>
+      <li>Win slowly → small or no gain 😐</li>
+      <li>Give up or lose → lose ELO ❌</li>
+      <li>Harder levels give more potential ELO gain 🧠</li>
+      <li>High-rank players gain less and lose more ⚖️</li>
+    </ul>
+    <p>Ranks and Emojis:</p>
+    <ul>
+      <li>⚒️ Iron: 0-799</li>
+      <li>🥉 Bronze: 800-999</li>
+      <li>🥈 Silver: 1000-1299</li>
+      <li>🥇 Gold: 1300-1599</li>
+      <li>💠 Platinum: 1600-1999</li>
+      <li>🔷 Diamond: 2000-2499</li>
+      <li>💚 Emerald: 2500-2999</li>
+      <li>👑 Grandmaster: 3000+</li>
+    </ul>
+    <p>💬 The better (and faster) you guess, the higher you climb — but high-ELO players must perform <em>consistently well</em> to keep their rank.</p>
+  </div>
+</div>
     <section class="stats card">
       <h2>Stats</h2>
       

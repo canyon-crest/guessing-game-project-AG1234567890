@@ -121,6 +121,7 @@ function makeGuess() {
     updateTimers(endMs);
     reset();
     updateElo(true, score, level);
+
     return;
   }
 
@@ -154,6 +155,7 @@ function giveUp() {
   updateLeaderboard(score);
   updateTimers(endMs);
   reset();
+
 }
 
 function reset() {
@@ -385,20 +387,20 @@ function toRoman(num) {
 }
 
 function isTriangular(n) {
-  // Solve n = k(k+1)/2 for integer k
+
   const k = Math.floor((Math.sqrt(8 * n + 1) - 1) / 2);
   return (k * (k + 1)) / 2 === n;
 }
 
 function isFibonacci(n) {
-  // A number is Fibonacci if (5n^2 + 4) or (5n^2 - 4) is a perfect square
+
   const isSquare = (x) => Number.isInteger(Math.sqrt(x));
   return isSquare(5 * n * n + 4) || isSquare(5 * n * n - 4);
 }
 
 function nextPrime(n) {
   let x = n + 1;
-  while (x < n + 1000) { // safety cap
+  while (x < n + 1000) { 
     if (isPrime(x)) return x;
     x++;
   }
@@ -477,10 +479,10 @@ function stopLiveTimer() {
 }
 
 
-let totalGlobalTime = 0; // total seconds across all games
+let totalGlobalTime = 0; 
 
 function startGlobalTimer() {
-  // Only start if not already running
+
   if (globalActive) return;
 
   globalActive = true;
@@ -534,7 +536,7 @@ function updateElo(won, score, level) {
   const performance = won ? 1 : 0;
   const expected = 1 / (1 + 10 ** ((levelRating - elo) / 400));
 
-  // --- Base K scaling: harder to gain, easier to lose at high ELO ---
+
   let kFactor;
     if (elo < 800) kFactor = baseK * 2.5;
   if (elo < 800) kFactor = baseK * 2;
@@ -559,7 +561,7 @@ function updateElo(won, score, level) {
       delta += ineffPenalty;
     }
   } else {
-    delta -= 80; // harsh penalty for giving up
+    delta -= 100; 
   }
 
 
@@ -581,7 +583,6 @@ delta -= (elo/500)
   delta = Math.min(100, delta)
   elo = Math.max(100, elo + delta);
 
-  // --- Display feedback ---
   const actualChange = elo - oldElo;
   const symbol = actualChange >= 0 ? "🟢+" : "🔴";
   const rank = eloRank();
@@ -593,7 +594,7 @@ delta -= (elo/500)
 }
 
 function eloRank() {
-  const body = document.body; // or document.getElementById("gameContainer")
+  const body = document.body; 
   let rank = "";
   let color = "";
   let emoji = "";
@@ -632,9 +633,25 @@ function eloRank() {
     color = "linear-gradient(180deg, #ff4c4c, #7a0000)";
   }
 
-  // ✨ Animate background color change
+
   body.style.transition = "background 1s ease-in-out";
   body.style.background = color;
 
   return `${rank} ${emoji}`;
 }
+
+const helpBtn = document.getElementById("helpBtn");
+const helpModal = document.getElementById("helpModal");
+const closeHelp = document.getElementById("closeHelp");
+
+helpBtn.addEventListener("click", () => {
+  helpModal.classList.remove("hidden");
+});
+
+closeHelp.addEventListener("click", () => {
+  helpModal.classList.add("hidden");
+});
+
+window.addEventListener("click", (e) => {
+  if (e.target === helpModal) helpModal.classList.add("hidden");
+});
